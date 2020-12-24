@@ -14,4 +14,6 @@ public class SupportedValues {
     private Set<String> extensions;
 
     private Set<String> contentTypes;
+
+    private Set<String> queryParameters;
 }
