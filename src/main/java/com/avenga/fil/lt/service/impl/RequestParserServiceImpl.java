@@ -25,7 +25,7 @@ public class RequestParserServiceImpl implements RequestParserService {
 
     @Override
     public RequestPayloadData parseAndPreparePayload(APIGatewayProxyRequestEvent event) {
-        var contentType = parseContentType(Optional.of(event.getHeaders())
+        var contentType = parseContentType(Optional.ofNullable(event.getHeaders())
                         .orElseThrow(() -> new AbsentRequestHeader(ABSENT_REQUEST_HEADER_ERROR_MESSAGE)));
         var queryParams = validateRequestQueryParameter(event.getQueryStringParameters());
         return constructPayloadData(contentType, queryParams, event.getBody());
@@ -71,6 +71,6 @@ public class RequestParserServiceImpl implements RequestParserService {
     }
 
     private String parseAndValidateBody(String body) {
-        return Optional.of(body).orElseThrow(() -> new AbsentRequestBody(ABSENT_REQUEST_BODY_ERROR_MESSAGE));
+        return Optional.ofNullable(body).orElseThrow(() -> new AbsentRequestBody(ABSENT_REQUEST_BODY_ERROR_MESSAGE));
     }
 }

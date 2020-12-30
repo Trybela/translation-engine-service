@@ -1,5 +1,6 @@
 package com.avenga.fil.lt.service.impl;
 
+import com.avenga.fil.lt.data.FileStorageData;
 import com.avenga.fil.lt.service.S3Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -28,13 +29,15 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
-    public void saveFile(String fileName, String fileType, String userId, byte[] binaryFile, String contentType) {
+    public FileStorageData saveFile(String fileName, String fileType, String userId, byte[] binaryFile, String contentType) {
+        var fileKey = constructFileName(fileName, fileType, userId);
         PutObjectRequest objectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
-                .key(constructFileName(fileName, fileType, userId))
+                .key(fileKey)
                 .contentType(contentType)
                 .build();
         s3Client.putObject(objectRequest, RequestBody.fromBytes(binaryFile));
+        return new FileStorageData(bucketName, fileKey);
     }
 
     private String constructFileName(String fileName, String fileType, String userId) {
