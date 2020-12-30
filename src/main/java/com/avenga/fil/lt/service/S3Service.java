@@ -1,6 +1,8 @@
 package com.avenga.fil.lt.service;
 
+import com.avenga.fil.lt.data.FileStorageData;
+
 public interface S3Service {
 
-    void saveFile(String fileName, String fileType, String userId, byte[] binaryFile, String contentType);
+    FileStorageData saveFile(String fileName, String fileType, String userId, byte[] binaryFile, String contentType);
 }
