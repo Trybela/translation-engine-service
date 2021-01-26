@@ -6,6 +6,7 @@ public final class GeneralConstants {
     public static final String INCOMING_REQUEST_LOG_MESSAGE = "Starting to process the incoming request";
     public static final String FILE_SUCCESSFULLY_UPLOADED = "Incoming file has uploaded to s3";
     public static final String TEXT_EXTRACT_ENDED = "The text extraction process has ended.";
+    public static final String PDF_DOCUMENT_HAS_CREATED = "Pdf document has successfully created";
 
     //ERROR MESSAGE
     public static final String UNSUPPORTED_CONTENT_TYPE_ERROR_MESSAGE = "Given %s content-type is not supported";
@@ -14,6 +15,7 @@ public final class GeneralConstants {
     public static final String ABSENT_REQUEST_QUERY_PARAM_ERROR_MESSAGE = "Not all mandatory request parameters exist";
     public static final String ABSENT_REQUEST_BODY_ERROR_MESSAGE = "Request body in empty!";
     public static final String TEXT_EXTRACT_PROCESS_ERROR_MESSAGE = "Error during extracting text process.";
+    public static final String PDF_FORMATION_ERROR_MESSAGE = "Error during pdf document formation - %s";
 
     //Response
     public static final String ERROR_RESPONSE_FORMAT = "{ \"errorMessage\": \"%s\" }";

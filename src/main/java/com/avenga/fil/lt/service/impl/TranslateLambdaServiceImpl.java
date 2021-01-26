@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.avenga.fil.lt.data.FileStorageData;
 import com.avenga.fil.lt.data.RequestPayloadData;
 import com.avenga.fil.lt.data.TextExtractInput;
+import com.avenga.fil.lt.data.extract.Pages;
 import com.avenga.fil.lt.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
     private final S3Service s3Service;
     private final ResponseService responseService;
     private final TextExtractService textExtractService;
+    private final DocumentFormationService documentFormationService;
 
     @Override
     public APIGatewayProxyResponseEvent processRequest(APIGatewayProxyRequestEvent event) {
@@ -29,12 +31,12 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
         return process(event);
     }
 
-    //TODO handle extracted text
     private APIGatewayProxyResponseEvent process(APIGatewayProxyRequestEvent event) {
         try {
             var payloadData = parserService.parseAndPreparePayload(event);
             var storageData = saveFileToS3(payloadData);
-            extractText(payloadData.getFileType(), storageData);
+            var extractedPages = extractText(payloadData.getFileType(), storageData);
+            documentFormationService.pdfFormation(extractedPages.getPages());
             return responseService.createSuccessResponse();
 
         } catch (Throwable throwable) {
@@ -50,10 +52,10 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
         return storageData;
     }
 
-    private String extractText(String fileType, FileStorageData storageData) {
-        var text = textExtractService.extractText(new TextExtractInput(storageData.getBucketName(),
+    private Pages extractText(String fileType, FileStorageData storageData) {
+        var pages = textExtractService.extractText(new TextExtractInput(storageData.getBucketName(),
                 storageData.getFileKey(), fileType));
         log.info(TEXT_EXTRACT_ENDED);
-        return text;
+        return pages;
     }
 }
