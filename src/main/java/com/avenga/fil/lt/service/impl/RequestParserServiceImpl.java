@@ -26,7 +26,7 @@ public class RequestParserServiceImpl implements RequestParserService {
     @Override
     public RequestPayloadData parseAndPreparePayload(APIGatewayProxyRequestEvent event) {
         var contentType = parseContentType(Optional.ofNullable(event.getHeaders())
-                        .orElseThrow(() -> new AbsentRequestHeader(ABSENT_REQUEST_HEADER_ERROR_MESSAGE)));
+                .orElseThrow(() -> new AbsentRequestHeader(ABSENT_REQUEST_HEADER_ERROR_MESSAGE)));
         var queryParams = validateRequestQueryParameter(event.getQueryStringParameters());
         return constructPayloadData(contentType, queryParams, event.getBody());
     }
@@ -35,7 +35,7 @@ public class RequestParserServiceImpl implements RequestParserService {
         return RequestPayloadData.builder()
                 .contentType(contentType)
                 .fileType(parseAndValidateFileType(queryParams.get(FILE_NAME)))
-                .fileName(parseFileName(queryParams.get(FILE_NAME)))
+                .fileName(queryParams.get(FILE_NAME))
                 .fromLanguage(queryParams.get(FROM_LANGUAGE))
                 .toLanguage(queryParams.get(TO_LANGUAGE))
                 .userId(queryParams.get(USER_ID))
@@ -60,14 +60,10 @@ public class RequestParserServiceImpl implements RequestParserService {
 
     private String parseAndValidateFileType(String fileName) {
         var fileType = fileName.substring(fileName.lastIndexOf(EXTENSION_DELIMITER) + NEXT_INDEX);
-        if(!(supportedValues.getExtensions().contains(fileType))) {
+        if (!(supportedValues.getExtensions().contains(fileType))) {
             throw new UnsupportedFileTypeException(String.format(UNSUPPORTED_FILE_TYPE_ERROR_MESSAGE, fileType));
         }
         return fileType;
-    }
-
-    private String parseFileName(String fileName) {
-        return fileName.substring(FIRST_INDEX, fileName.lastIndexOf(EXTENSION_DELIMITER));
     }
 
     private String parseAndValidateBody(String body) {
