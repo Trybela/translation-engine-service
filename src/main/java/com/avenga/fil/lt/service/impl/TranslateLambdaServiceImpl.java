@@ -6,6 +6,7 @@ import com.avenga.fil.lt.data.FileStorageData;
 import com.avenga.fil.lt.data.RequestPayloadData;
 import com.avenga.fil.lt.data.TextExtractInput;
 import com.avenga.fil.lt.data.extract.Pages;
+import com.avenga.fil.lt.exception.AbsentFileException;
 import com.avenga.fil.lt.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,11 +35,10 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
     private APIGatewayProxyResponseEvent process(APIGatewayProxyRequestEvent event) {
         try {
             var payloadData = parserService.parseAndPreparePayload(event);
-            var storageData = saveFileToS3(payloadData);
+            var storageData = getFileFromS3(payloadData);
             var extractedPages = extractText(payloadData.getFileType(), storageData);
             documentFormationService.pdfFormation(extractedPages.getPages());
             return responseService.createSuccessResponse();
-
         } catch (Throwable throwable) {
             log.error(throwable.getMessage(), throwable);
             return responseService.createErrorResponse(throwable);
@@ -49,6 +49,15 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
         var storageData = s3Service.saveFile(payloadData.getFileName(), payloadData.getFileType(), payloadData.getUserId(),
                 Base64.decodeBase64(payloadData.getBody().getBytes()), payloadData.getContentType());
         log.info(FILE_SUCCESSFULLY_UPLOADED);
+        return storageData;
+    }
+
+    private FileStorageData getFileFromS3(RequestPayloadData payloadData) {
+        if (!s3Service.isFileExists(payloadData.getFileName())) {
+            throw new AbsentFileException(String.format(ABSENT_FILE_ON_S3_BUCKET_ERROR_MESSAGE, payloadData.getFileName()));
+        }
+        var storageData = s3Service.getFile(payloadData.getFileName());
+        log.info(FILE_IS_PRESENT_ON_S3);
         return storageData;
     }
 
