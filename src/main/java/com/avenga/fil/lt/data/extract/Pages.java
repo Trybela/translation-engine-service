@@ -13,5 +13,5 @@ import java.util.List;
 @AllArgsConstructor
 public class Pages {
 
-    private List<List<LineContent>> pages;
+    private List<List<LineContent>> content;
 }

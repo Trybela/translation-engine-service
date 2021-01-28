@@ -10,7 +10,6 @@ import com.avenga.fil.lt.exception.AbsentFileException;
 import com.avenga.fil.lt.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Service;
 
 import static com.avenga.fil.lt.constants.GeneralConstants.*;
@@ -37,19 +36,12 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
             var payloadData = parserService.parseAndPreparePayload(event);
             var storageData = getFileFromS3(payloadData);
             var extractedPages = extractText(payloadData.getFileType(), storageData);
-            documentFormationService.pdfFormation(extractedPages.getPages());
+            documentFormationService.pdfFormation(extractedPages.getContent());
             return responseService.createSuccessResponse();
         } catch (Throwable throwable) {
             log.error(throwable.getMessage(), throwable);
             return responseService.createErrorResponse(throwable);
         }
-    }
-
-    private FileStorageData saveFileToS3(RequestPayloadData payloadData) {
-        var storageData = s3Service.saveFile(payloadData.getFileName(), payloadData.getFileType(), payloadData.getUserId(),
-                Base64.decodeBase64(payloadData.getBody().getBytes()), payloadData.getContentType());
-        log.info(FILE_SUCCESSFULLY_UPLOADED);
-        return storageData;
     }
 
     private FileStorageData getFileFromS3(RequestPayloadData payloadData) {
