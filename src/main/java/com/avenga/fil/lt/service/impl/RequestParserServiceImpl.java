@@ -18,7 +18,6 @@ import static com.avenga.fil.lt.constants.GeneralConstants.*;
 @RequiredArgsConstructor
 public class RequestParserServiceImpl implements RequestParserService {
 
-    private static final int FIRST_INDEX = 0;
     private static final int NEXT_INDEX = 1;
 
     private final SupportedValues supportedValues;
@@ -28,10 +27,10 @@ public class RequestParserServiceImpl implements RequestParserService {
         var contentType = parseContentType(Optional.ofNullable(event.getHeaders())
                 .orElseThrow(() -> new AbsentRequestHeader(ABSENT_REQUEST_HEADER_ERROR_MESSAGE)));
         var queryParams = validateRequestQueryParameter(event.getQueryStringParameters());
-        return constructPayloadData(contentType, queryParams, event.getBody());
+        return constructPayloadData(contentType, queryParams);
     }
 
-    private RequestPayloadData constructPayloadData(String contentType, Map<String, String> queryParams, String body) {
+    private RequestPayloadData constructPayloadData(String contentType, Map<String, String> queryParams) {
         return RequestPayloadData.builder()
                 .contentType(contentType)
                 .fileType(parseAndValidateFileType(queryParams.get(FILE_NAME)))
@@ -39,7 +38,6 @@ public class RequestParserServiceImpl implements RequestParserService {
                 .fromLanguage(queryParams.get(FROM_LANGUAGE))
                 .toLanguage(queryParams.get(TO_LANGUAGE))
                 .userId(queryParams.get(USER_ID))
-                .body(parseAndValidateBody(body))
                 .build();
     }
 
@@ -64,9 +62,5 @@ public class RequestParserServiceImpl implements RequestParserService {
             throw new UnsupportedFileTypeException(String.format(UNSUPPORTED_FILE_TYPE_ERROR_MESSAGE, fileType));
         }
         return fileType;
-    }
-
-    private String parseAndValidateBody(String body) {
-        return Optional.ofNullable(body).orElseThrow(() -> new AbsentRequestBody(ABSENT_REQUEST_BODY_ERROR_MESSAGE));
     }
 }
