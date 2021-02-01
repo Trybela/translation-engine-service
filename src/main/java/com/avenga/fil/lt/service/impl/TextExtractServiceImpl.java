@@ -1,7 +1,6 @@
 package com.avenga.fil.lt.service.impl;
 
 import com.avenga.fil.lt.data.TextExtractInput;
-import com.avenga.fil.lt.data.extract.Pages;
 import com.avenga.fil.lt.exception.TextExtractProcessException;
 import com.avenga.fil.lt.service.TextExtractService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,14 +29,13 @@ public class TextExtractServiceImpl implements TextExtractService {
     }
 
     @Override
-    public Pages extractText(TextExtractInput inputData) {
+    public String extractText(TextExtractInput inputData) {
         try {
             InvokeRequest request = InvokeRequest.builder()
                     .functionName(functionName)
                     .payload(SdkBytes.fromUtf8String(objectMapper.writeValueAsString(inputData)))
                     .build();
-            var result =  lambdaClient.invoke(request).payload().asUtf8String();
-            return objectMapper.readValue(result, Pages.class);
+            return lambdaClient.invoke(request).payload().asUtf8String();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw new TextExtractProcessException(TEXT_EXTRACT_PROCESS_ERROR_MESSAGE);

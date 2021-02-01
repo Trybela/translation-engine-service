@@ -3,9 +3,9 @@ package com.avenga.fil.lt.service.impl;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.avenga.fil.lt.data.FileStorageData;
+import com.avenga.fil.lt.data.FileType;
 import com.avenga.fil.lt.data.RequestPayloadData;
 import com.avenga.fil.lt.data.TextExtractInput;
-import com.avenga.fil.lt.data.extract.Pages;
 import com.avenga.fil.lt.exception.AbsentFileException;
 import com.avenga.fil.lt.service.*;
 import lombok.RequiredArgsConstructor;
@@ -35,8 +35,9 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
         try {
             var payloadData = parserService.parseAndPreparePayload(event);
             var storageData = getFileFromS3(payloadData);
-            var extractedPages = extractText(payloadData.getFileType(), storageData);
-            documentFormationService.pdfFormation(extractedPages.getContent());
+            var extractedContent = extractText(payloadData.getFileType(), storageData);
+            var byteDocument = documentFormationService.formation(fileType(payloadData.getFileType()), extractedContent);
+            saveFileToS3(byteDocument, payloadData);
             return responseService.createSuccessResponse();
         } catch (Throwable throwable) {
             log.error(throwable.getMessage(), throwable);
@@ -53,10 +54,19 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
         return storageData;
     }
 
-    private Pages extractText(String fileType, FileStorageData storageData) {
+    private void saveFileToS3(byte[] byteDocument, RequestPayloadData payloadData) {
+        s3Service.saveFile(payloadData.getFileName() + TRANSLATED,
+                payloadData.getFileType(), payloadData.getUserId(), byteDocument, payloadData.getContentType());
+    }
+
+    private String extractText(String fileType, FileStorageData storageData) {
         var pages = textExtractService.extractText(new TextExtractInput(storageData.getBucketName(),
                 storageData.getFileKey(), fileType));
         log.info(TEXT_EXTRACT_ENDED);
         return pages;
+    }
+
+    private FileType fileType(String type) {
+        return FileType.valueOf(type.toUpperCase());
     }
 }
