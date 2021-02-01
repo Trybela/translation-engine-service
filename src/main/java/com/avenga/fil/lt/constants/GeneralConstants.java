@@ -18,6 +18,7 @@ public final class GeneralConstants {
     public static final String ABSENT_FILE_ON_S3_BUCKET_ERROR_MESSAGE = "File %s is absent on S3 bucket!";
     public static final String TEXT_EXTRACT_PROCESS_ERROR_MESSAGE = "Error during extracting text process.";
     public static final String PDF_FORMATION_ERROR_MESSAGE = "Error during pdf document formation - %s";
+    public static final String EXCEL_FORMATION_ERROR_MESSAGE = "Error during excel document formation -%s";
 
     //Response
     public static final String ERROR_RESPONSE_FORMAT = "{ \"errorMessage\": \"%s\" }";

@@ -3,6 +3,7 @@ package com.avenga.fil.lt.service.impl;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.avenga.fil.lt.data.FileStorageData;
+import com.avenga.fil.lt.data.FileType;
 import com.avenga.fil.lt.data.RequestPayloadData;
 import com.avenga.fil.lt.data.TextExtractInput;
 import com.avenga.fil.lt.exception.AbsentFileException;
@@ -35,7 +36,7 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
             var payloadData = parserService.parseAndPreparePayload(event);
             var storageData = getFileFromS3(payloadData);
             var extractedContent = extractText(payloadData.getFileType(), storageData);
-            var byteDocument = documentFormationService.formation(payloadData.getFileType(), extractedContent);
+            var byteDocument = documentFormationService.formation(fileType(payloadData.getFileType()), extractedContent);
             saveFileToS3(byteDocument, payloadData);
             return responseService.createSuccessResponse();
         } catch (Throwable throwable) {
@@ -63,5 +64,9 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
                 storageData.getFileKey(), fileType));
         log.info(TEXT_EXTRACT_ENDED);
         return pages;
+    }
+
+    private FileType fileType(String type) {
+        return FileType.valueOf(type.toUpperCase());
     }
 }

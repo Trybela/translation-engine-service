@@ -1,7 +1,9 @@
 package com.avenga.fil.lt.service.impl;
 
+import com.avenga.fil.lt.data.FileType;
 import com.avenga.fil.lt.data.extract.LineContent;
 import com.avenga.fil.lt.data.extract.Pages;
+import com.avenga.fil.lt.exception.ExcelFormationException;
 import com.avenga.fil.lt.exception.PdfFormationException;
 import com.avenga.fil.lt.service.DocumentFormationService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -39,21 +41,21 @@ public class DocumentFormationServiceImpl implements DocumentFormationService {
     private static final int Y_AXIS_SHIFT = 742;
     private static final float Y_AXIS_ABSOLUTE = 842f;
     private static final int FONT_SIZE = 8;
-    private final Map<String, Function<String, byte[]>> typeResolver = Map.of(
-        JPG, this::pdfFormation,
-        JPEG, this::pdfFormation,
-        PNG, this::pdfFormation,
-        BMP, this::pdfFormation,
-        XLS, this::xlsFormation,
-        XLSX, this::xlsxFormation,
-        PDF, this::pdfFormation
+    private final Map<FileType, Function<String, byte[]>> typeResolver = Map.of(
+            FileType.JPG, this::pdfFormation,
+            FileType.JPEG, this::pdfFormation,
+            FileType.PNG, this::pdfFormation,
+            FileType.BMP, this::pdfFormation,
+            FileType.XLS, this::xlsFormation,
+            FileType.XLSX, this::xlsxFormation,
+            FileType.PDF, this::pdfFormation
     );
 
     private final ObjectMapper objectMapper;
 
     @Override
-    public byte[] formation(String documentType, String content) {
-        return typeResolver.get(documentType.toLowerCase()).apply(content);
+    public byte[] formation(FileType documentType, String content) {
+        return typeResolver.get(documentType).apply(content);
     }
 
     public byte[] pdfFormation(String content) {
@@ -91,7 +93,7 @@ public class DocumentFormationServiceImpl implements DocumentFormationService {
             workbook.write(outputStream);
             return outputStream.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException();
+            throw new ExcelFormationException(String.format(EXCEL_FORMATION_ERROR_MESSAGE, e.getMessage()));
         }
     }
 
