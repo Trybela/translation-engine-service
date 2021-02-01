@@ -9,6 +9,7 @@ public final class GeneralConstants {
     public static final String PDF_DOCUMENT_HAS_CREATED = "Pdf document has successfully created";
     public static final String XLS_DOCUMENT_HAS_CREATED = "Xls document has successfully created";
     public static final String XLSX_DOCUMENT_HAS_CREATED = "Xlsx document has successfully created";
+    public static final String TXT_DOCUMENT_HAS_CREATED = "Txt document has successfully created";
 
     //ERROR MESSAGE
     public static final String UNSUPPORTED_CONTENT_TYPE_ERROR_MESSAGE = "Given %s content-type is not supported";
@@ -19,6 +20,7 @@ public final class GeneralConstants {
     public static final String TEXT_EXTRACT_PROCESS_ERROR_MESSAGE = "Error during extracting text process.";
     public static final String PDF_FORMATION_ERROR_MESSAGE = "Error during pdf document formation - %s";
     public static final String EXCEL_FORMATION_ERROR_MESSAGE = "Error during excel document formation -%s";
+    public static final String TXT_FORMATION_ERROR_MESSAGE = "Error during txt document formation - %s";
 
     //Response
     public static final String ERROR_RESPONSE_FORMAT = "{ \"errorMessage\": \"%s\" }";

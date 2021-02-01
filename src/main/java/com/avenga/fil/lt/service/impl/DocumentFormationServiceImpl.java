@@ -5,6 +5,7 @@ import com.avenga.fil.lt.data.extract.LineContent;
 import com.avenga.fil.lt.data.extract.Pages;
 import com.avenga.fil.lt.exception.ExcelFormationException;
 import com.avenga.fil.lt.exception.PdfFormationException;
+import com.avenga.fil.lt.exception.TxtFormationException;
 import com.avenga.fil.lt.service.DocumentFormationService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.avenga.fil.lt.constants.GeneralConstants.*;
@@ -48,7 +50,8 @@ public class DocumentFormationServiceImpl implements DocumentFormationService {
             FileType.BMP, this::pdfFormation,
             FileType.XLS, this::xlsFormation,
             FileType.XLSX, this::xlsxFormation,
-            FileType.PDF, this::pdfFormation
+            FileType.PDF, this::pdfFormation,
+            FileType.TXT, this::txtFormation
     );
 
     private final ObjectMapper objectMapper;
@@ -59,7 +62,7 @@ public class DocumentFormationServiceImpl implements DocumentFormationService {
     }
 
     public byte[] pdfFormation(String content) {
-        try{
+        try {
             var pages = objectMapper.readValue(content, Pages.class).getContent();
             var document = new Document(PageSize.A4);
             var outputStream = new ByteArrayOutputStream();
@@ -69,7 +72,7 @@ public class DocumentFormationServiceImpl implements DocumentFormationService {
             document.close();
             log.info(PDF_DOCUMENT_HAS_CREATED);
             return outputStream.toByteArray();
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new PdfFormationException(String.format(PDF_FORMATION_ERROR_MESSAGE, e.getMessage()));
         }
     }
@@ -86,9 +89,22 @@ public class DocumentFormationServiceImpl implements DocumentFormationService {
         return document;
     }
 
+    public byte[] txtFormation(String content) {
+        try {
+            var lines = objectMapper.readValue(content, new TypeReference<List<String>>() {
+            });
+            var document = lines.stream().collect(Collectors.joining(System.lineSeparator())).getBytes();
+            log.info(TXT_DOCUMENT_HAS_CREATED);
+            return document;
+        } catch (Exception e) {
+            throw new TxtFormationException(String.format(TXT_FORMATION_ERROR_MESSAGE, e.getMessage()));
+        }
+    }
+
     private byte[] excelFormation(Workbook workbook, String content) {
         try (var outputStream = new ByteArrayOutputStream()) {
-            var sheetMatrix = objectMapper.readValue(content, new TypeReference<List<List<String>>>() {});
+            var sheetMatrix = objectMapper.readValue(content, new TypeReference<List<List<String>>>() {
+            });
             fillRows(sheetMatrix, workbook.createSheet(TRANSLATED_SHEET));
             workbook.write(outputStream);
             return outputStream.toByteArray();
@@ -119,21 +135,21 @@ public class DocumentFormationServiceImpl implements DocumentFormationService {
         try {
             var font = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
             addText(new String(lineContent.getText().getBytes(), StandardCharsets.UTF_8),
-                    lineContent.getXAxis()*X_AXIS_SHIFT,
-                    Y_AXIS_ABSOLUTE - (lineContent.getYAxis()*Y_AXIS_SHIFT), writer, font);
+                    lineContent.getXAxis() * X_AXIS_SHIFT,
+                    Y_AXIS_ABSOLUTE - (lineContent.getYAxis() * Y_AXIS_SHIFT), writer, font);
         } catch (Exception e) {
             throw new PdfFormationException(String.format(PDF_FORMATION_ERROR_MESSAGE, e.getMessage()));
         }
     }
 
     private void addText(String text, float x, float y, PdfWriter writer, BaseFont font) {
-            PdfContentByte cb = writer.getDirectContent();
-            cb.saveState();
-            cb.beginText();
-            cb.moveText(x, y);
-            cb.setFontAndSize(font, DocumentFormationServiceImpl.FONT_SIZE);
-            cb.showText(text);
-            cb.endText();
-            cb.restoreState();
+        PdfContentByte cb = writer.getDirectContent();
+        cb.saveState();
+        cb.beginText();
+        cb.moveText(x, y);
+        cb.setFontAndSize(font, DocumentFormationServiceImpl.FONT_SIZE);
+        cb.showText(text);
+        cb.endText();
+        cb.restoreState();
     }
 }
