@@ -30,15 +30,6 @@ public final class GeneralConstants {
     public static final String TRANSLATED_SHEET = "Translated sheet";
     public static final String TRANSLATED = "translated";
 
-    //Types
-    public static final String JPG = "jpg";
-    public static final String JPEG = "jpeg";
-    public static final String PNG = "png";
-    public static final String BMP = "bmp";
-    public static final String XLS = "xls";
-    public static final String XLSX = "xlsx";
-    public static final String PDF = "pdf";
-
     private GeneralConstants() {
         throw new UnsupportedOperationException();
     }
