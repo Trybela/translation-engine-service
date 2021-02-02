@@ -2,10 +2,7 @@ package com.avenga.fil.lt.service.impl;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-import com.avenga.fil.lt.data.FileStorageData;
-import com.avenga.fil.lt.data.FileType;
-import com.avenga.fil.lt.data.RequestPayloadData;
-import com.avenga.fil.lt.data.TextExtractInput;
+import com.avenga.fil.lt.data.*;
 import com.avenga.fil.lt.exception.AbsentFileException;
 import com.avenga.fil.lt.service.*;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +20,7 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
     private final S3Service s3Service;
     private final ResponseService responseService;
     private final TextExtractService textExtractService;
+    private final TextTranslateService textTranslateService;
     private final DocumentFormationService documentFormationService;
 
     @Override
@@ -36,7 +34,8 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
             var payloadData = parserService.parseAndPreparePayload(event);
             var storageData = getFileFromS3(payloadData);
             var extractedContent = extractText(payloadData.getFileType(), storageData);
-            var byteDocument = documentFormationService.formation(fileType(payloadData.getFileType()), extractedContent);
+            var translatedContent = translateText(payloadData, extractedContent);
+            var byteDocument = documentFormationService.formation(fileType(payloadData.getFileType()), translatedContent);
             saveFileToS3(byteDocument, payloadData);
             return responseService.createSuccessResponse();
         } catch (Throwable throwable) {
@@ -68,5 +67,12 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
 
     private FileType fileType(String type) {
         return FileType.valueOf(type.toUpperCase());
+    }
+
+    private String translateText(RequestPayloadData payloadData, String content) {
+        var pages = textTranslateService.translate(new TextTranslateInput(payloadData.getFromLanguage(),
+                payloadData.getToLanguage(), content, payloadData.getFileType()));
+        log.info(TEXT_TRANSLATE_ENDED);
+        return pages;
     }
 }
