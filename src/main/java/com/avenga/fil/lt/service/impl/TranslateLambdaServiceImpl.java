@@ -56,7 +56,7 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
 
     private void saveFileToS3(byte[] byteDocument, RequestPayloadData payloadData) {
         s3Service.saveFile(payloadData.getFileName() + TRANSLATED,
-                payloadData.getFileType(), payloadData.getUserId(), byteDocument, payloadData.getContentType());
+                payloadData.getFileType(), payloadData.getUserId(), byteDocument, fileType(payloadData.getFileType()).getContentType());
     }
 
     private String extractText(String fileType, FileStorageData storageData) {

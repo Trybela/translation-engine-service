@@ -14,6 +14,5 @@ public class RequestPayloadData {
     private String userId;
     private String fileName;
     private String fileType;
-    private String contentType;
     private String body;
 }
