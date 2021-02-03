@@ -25,7 +25,7 @@ public final class GeneralConstants {
     public static final String TEXT_TRANSLATE_PROCESS_ERROR_MESSAGE ="Error during translation text process.";
 
     //Response
-    public static final String ERROR_RESPONSE_FORMAT = "{ \"errorMessage\": \"%s\" }";
+    public static final String ERROR_RESPONSE_FORMAT = "ErrorMessage: %s";
     public static final String SUCCESS_RESPONSE = "Translation lambda completed successfully!";
 
     //General
