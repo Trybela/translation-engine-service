@@ -3,13 +3,13 @@ package com.avenga.fil.lt.service.impl;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.avenga.fil.lt.config.properties.SupportedValues;
 import com.avenga.fil.lt.data.RequestPayloadData;
-import com.avenga.fil.lt.exception.*;
+import com.avenga.fil.lt.exception.AbsentRequestQueryParameter;
+import com.avenga.fil.lt.exception.UnsupportedFileTypeException;
 import com.avenga.fil.lt.service.RequestParserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static com.avenga.fil.lt.constants.ApiEventConstants.*;
 import static com.avenga.fil.lt.constants.GeneralConstants.*;
@@ -24,29 +24,18 @@ public class RequestParserServiceImpl implements RequestParserService {
 
     @Override
     public RequestPayloadData parseAndPreparePayload(APIGatewayProxyRequestEvent event) {
-        var contentType = parseContentType(Optional.ofNullable(event.getHeaders())
-                .orElseThrow(() -> new AbsentRequestHeader(ABSENT_REQUEST_HEADER_ERROR_MESSAGE)));
         var queryParams = validateRequestQueryParameter(event.getQueryStringParameters());
-        return constructPayloadData(contentType, queryParams);
+        return constructPayloadData(queryParams);
     }
 
-    private RequestPayloadData constructPayloadData(String contentType, Map<String, String> queryParams) {
+    private RequestPayloadData constructPayloadData(Map<String, String> queryParams) {
         return RequestPayloadData.builder()
-                .contentType(contentType)
                 .fileType(parseAndValidateFileType(queryParams.get(FILE_NAME)))
                 .fileName(queryParams.get(FILE_NAME))
                 .fromLanguage(queryParams.get(FROM_LANGUAGE))
                 .toLanguage(queryParams.get(TO_LANGUAGE))
                 .userId(queryParams.get(USER_ID))
                 .build();
-    }
-
-    private String parseContentType(Map<String, String> headers) {
-        if (!supportedValues.getContentTypes().contains(headers.getOrDefault(CONTENT_TYPE, NOT_EXIST_DEFAULT_VALUE)))
-            throw new UnsupportedContentTypeException(
-                    String.format(UNSUPPORTED_CONTENT_TYPE_ERROR_MESSAGE, headers.get(CONTENT_TYPE)));
-
-        return headers.get(CONTENT_TYPE);
     }
 
     private Map<String, String> validateRequestQueryParameter(Map<String, String> queryParameters) {
