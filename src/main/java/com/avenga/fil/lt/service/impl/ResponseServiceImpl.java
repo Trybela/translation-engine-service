@@ -17,8 +17,8 @@ import static com.avenga.fil.lt.constants.GeneralConstants.SUCCESS_RESPONSE;
 public class ResponseServiceImpl implements ResponseService {
 
     @Override
-    public APIGatewayProxyResponseEvent createErrorResponse(Throwable throwable) {
-        return createResponse(String.format(ERROR_RESPONSE_FORMAT, throwable.getMessage()), determineHttpStatus(throwable));
+    public APIGatewayProxyResponseEvent createErrorResponse(Exception exception) {
+        return createResponse(String.format(ERROR_RESPONSE_FORMAT, exception.getMessage()), determineHttpStatus(exception));
     }
 
     @Override
