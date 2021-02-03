@@ -4,7 +4,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 
 public interface ResponseService {
 
-    APIGatewayProxyResponseEvent createErrorResponse(Throwable throwable);
+    APIGatewayProxyResponseEvent createErrorResponse(Exception exception);
 
     APIGatewayProxyResponseEvent createSuccessResponse();
 }

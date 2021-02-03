@@ -38,9 +38,9 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
             var byteDocument = documentFormationService.formation(fileType(payloadData.getFileType()), translatedContent);
             saveFileToS3(byteDocument, payloadData);
             return responseService.createSuccessResponse();
-        } catch (Throwable throwable) {
-            log.error(throwable.getMessage(), throwable);
-            return responseService.createErrorResponse(throwable);
+        } catch (Exception exception) {
+            log.error(exception.getMessage(), exception);
+            return responseService.createErrorResponse(exception);
         }
     }
 
