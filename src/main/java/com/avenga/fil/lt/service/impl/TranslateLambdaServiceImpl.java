@@ -45,16 +45,16 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
     }
 
     private FileStorageData getFileFromS3(RequestPayloadData payloadData) {
-        if (!s3Service.isFileExists(payloadData.getFileName())) {
-            throw new AbsentFileException(String.format(ABSENT_FILE_ON_S3_BUCKET_ERROR_MESSAGE, payloadData.getFileName()));
+        if (!s3Service.isFileExists(payloadData.getDocumentName())) {
+            throw new AbsentFileException(String.format(ABSENT_FILE_ON_S3_BUCKET_ERROR_MESSAGE, payloadData.getDocumentName()));
         }
-        var storageData = s3Service.getFile(payloadData.getFileName());
+        var storageData = s3Service.getFile(payloadData.getDocumentName());
         log.info(FILE_IS_PRESENT_ON_S3);
         return storageData;
     }
 
     private void saveFileToS3(byte[] byteDocument, RequestPayloadData payloadData) {
-        s3Service.saveFile(payloadData.getFileName() + TRANSLATED,
+        s3Service.saveFile(payloadData.getDocumentName() + TRANSLATED,
                 payloadData.getFileType(), payloadData.getUserId(), byteDocument, fileType(payloadData.getFileType()).getContentType());
     }
 

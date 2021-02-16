@@ -30,8 +30,8 @@ public class RequestParserServiceImpl implements RequestParserService {
 
     private RequestPayloadData constructPayloadData(Map<String, String> queryParams) {
         return RequestPayloadData.builder()
-                .fileType(parseAndValidateFileType(queryParams.get(FILE_NAME)))
-                .fileName(queryParams.get(FILE_NAME))
+                .fileType(parseAndValidateFileType(queryParams.get(DOCUMENT_NAME)))
+                .documentName(queryParams.get(DOCUMENT_NAME))
                 .fromLanguage(queryParams.get(FROM_LANGUAGE))
                 .toLanguage(queryParams.get(TO_LANGUAGE))
                 .userId(queryParams.get(USER_ID))
