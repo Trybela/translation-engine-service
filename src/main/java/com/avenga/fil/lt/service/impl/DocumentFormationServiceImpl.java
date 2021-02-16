@@ -32,7 +32,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.avenga.fil.lt.constants.GeneralConstants.*;
+import static com.avenga.fil.lt.constant.GeneralConstants.*;
 
 @Slf4j
 @Service

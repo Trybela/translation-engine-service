@@ -1,4 +1,4 @@
-package com.avenga.fil.lt.config.properties;
+package com.avenga.fil.lt.config.property;
 
 import lombok.Getter;
 import lombok.Setter;

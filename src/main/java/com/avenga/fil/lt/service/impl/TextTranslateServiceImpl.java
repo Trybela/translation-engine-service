@@ -11,7 +11,7 @@ import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.lambda.LambdaClient;
 import software.amazon.awssdk.services.lambda.model.InvokeRequest;
 
-import static com.avenga.fil.lt.constants.GeneralConstants.TEXT_TRANSLATE_PROCESS_ERROR_MESSAGE;
+import static com.avenga.fil.lt.constant.GeneralConstants.TEXT_TRANSLATE_PROCESS_ERROR_MESSAGE;
 
 @Slf4j
 @Service

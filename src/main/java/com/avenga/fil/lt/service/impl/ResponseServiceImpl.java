@@ -9,9 +9,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-import static com.avenga.fil.lt.constants.ApiEventConstants.CONTENT_TYPE;
-import static com.avenga.fil.lt.constants.GeneralConstants.ERROR_RESPONSE_FORMAT;
-import static com.avenga.fil.lt.constants.GeneralConstants.SUCCESS_RESPONSE;
+import static com.avenga.fil.lt.constant.ApiEventConstants.CONTENT_TYPE;
+import static com.avenga.fil.lt.constant.GeneralConstants.ERROR_RESPONSE_FORMAT;
 
 @Service
 public class ResponseServiceImpl implements ResponseService {
@@ -22,8 +21,8 @@ public class ResponseServiceImpl implements ResponseService {
     }
 
     @Override
-    public APIGatewayProxyResponseEvent createSuccessResponse() {
-        return createResponse(SUCCESS_RESPONSE, HttpStatus.OK);
+    public APIGatewayProxyResponseEvent createSuccessResponse(String message) {
+        return createResponse(message, HttpStatus.CREATED);
     }
 
     private HttpStatus determineHttpStatus(Throwable throwable) {

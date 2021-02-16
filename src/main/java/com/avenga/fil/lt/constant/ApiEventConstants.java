@@ -1,4 +1,4 @@
-package com.avenga.fil.lt.constants;
+package com.avenga.fil.lt.constant;
 
 public final class ApiEventConstants {
 
