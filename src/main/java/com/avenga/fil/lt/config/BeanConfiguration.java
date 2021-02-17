@@ -1,7 +1,7 @@
 package com.avenga.fil.lt.config;
 
-import com.avenga.fil.lt.config.properties.SupportedValues;
-import com.avenga.fil.lt.config.properties.TranslationOption;
+import com.avenga.fil.lt.config.property.SupportedValues;
+import com.avenga.fil.lt.config.property.TranslationOption;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

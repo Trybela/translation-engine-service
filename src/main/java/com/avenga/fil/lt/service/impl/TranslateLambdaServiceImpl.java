@@ -5,11 +5,17 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.avenga.fil.lt.data.*;
 import com.avenga.fil.lt.exception.AbsentFileException;
 import com.avenga.fil.lt.service.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import static com.avenga.fil.lt.constants.GeneralConstants.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.StringJoiner;
+
+import static com.avenga.fil.lt.constant.GeneralConstants.*;
 
 @Slf4j
 @Service
@@ -22,6 +28,10 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
     private final TextExtractService textExtractService;
     private final TextTranslateService textTranslateService;
     private final DocumentFormationService documentFormationService;
+    private final ObjectMapper objectMapper;
+    private static final String DATE_TIME_PATTERN = "yyyyMMddHHmmss";
+    private static final String FILE_NAME_DELIMITER = "_";
+    private static final String URL_PREFIX = "https://sandbox.api.fil.com/language-translator/v1/status?translatedDocumentName=";
 
     @Override
     public APIGatewayProxyResponseEvent processRequest(APIGatewayProxyRequestEvent event) {
@@ -36,8 +46,10 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
             var extractedContent = extractText(payloadData.getFileType(), storageData);
             var translatedContent = translateText(payloadData, extractedContent);
             var byteDocument = documentFormationService.formation(fileType(payloadData.getFileType()), translatedContent);
-            saveFileToS3(byteDocument, payloadData);
-            return responseService.createSuccessResponse();
+            var fileName = constructFileName(payloadData.getDocumentName() + TRANSLATED, payloadData.getFileType(), payloadData.getUserId());
+            var statusEntity = getStatus(fileName);
+            saveFileToS3(fileName, byteDocument, payloadData);
+            return responseService.createSuccessResponse(objectMapper.writeValueAsString(statusEntity));
         } catch (Exception exception) {
             log.error(exception.getMessage(), exception);
             return responseService.createErrorResponse(exception);
@@ -45,17 +57,16 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
     }
 
     private FileStorageData getFileFromS3(RequestPayloadData payloadData) {
-        if (!s3Service.isFileExists(payloadData.getFileName())) {
-            throw new AbsentFileException(String.format(ABSENT_FILE_ON_S3_BUCKET_ERROR_MESSAGE, payloadData.getFileName()));
+        if (!s3Service.isFileExists(payloadData.getDocumentName())) {
+            throw new AbsentFileException(String.format(ABSENT_FILE_ON_S3_BUCKET_ERROR_MESSAGE, payloadData.getDocumentName()));
         }
-        var storageData = s3Service.getFile(payloadData.getFileName());
+        var storageData = s3Service.getFile(payloadData.getDocumentName());
         log.info(FILE_IS_PRESENT_ON_S3);
         return storageData;
     }
 
-    private void saveFileToS3(byte[] byteDocument, RequestPayloadData payloadData) {
-        s3Service.saveFile(payloadData.getFileName() + TRANSLATED,
-                payloadData.getFileType(), payloadData.getUserId(), byteDocument, fileType(payloadData.getFileType()).getContentType());
+    private void saveFileToS3(String fileName, byte[] byteDocument, RequestPayloadData payloadData) {
+        s3Service.saveFile(fileName, byteDocument, fileType(payloadData.getFileType()).getContentType());
     }
 
     private String extractText(String fileType, FileStorageData storageData) {
@@ -74,5 +85,18 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
                 payloadData.getToLanguage(), content, payloadData.getFileType()));
         log.info(TEXT_TRANSLATE_ENDED);
         return pages;
+    }
+
+    private String constructFileName(String fileName, String fileType, String userId) {
+        var dateTime = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN).format(LocalDateTime.now());
+        return new StringJoiner(FILE_NAME_DELIMITER).add(fileName).add(userId).add(dateTime).toString() +
+                EXTENSION_DELIMITER + fileType;
+    }
+
+    private Status getStatus(String fileName) {
+        return Status.builder()
+                .translatedDocumentName(fileName)
+                .links(List.of(Link.builder().href(URL_PREFIX + fileName).build()))
+                .build();
     }
 }

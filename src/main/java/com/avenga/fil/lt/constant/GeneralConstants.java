@@ -1,4 +1,4 @@
-package com.avenga.fil.lt.constants;
+package com.avenga.fil.lt.constant;
 
 public final class GeneralConstants {
 
@@ -26,7 +26,6 @@ public final class GeneralConstants {
 
     //Response
     public static final String ERROR_RESPONSE_FORMAT = "ErrorMessage: %s";
-    public static final String SUCCESS_RESPONSE = "Translation lambda completed successfully!";
 
     //General
     public static final String EXTENSION_DELIMITER = ".";

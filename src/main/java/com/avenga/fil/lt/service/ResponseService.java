@@ -6,5 +6,5 @@ public interface ResponseService {
 
     APIGatewayProxyResponseEvent createErrorResponse(Exception exception);
 
-    APIGatewayProxyResponseEvent createSuccessResponse();
+    APIGatewayProxyResponseEvent createSuccessResponse(String message);
 }
