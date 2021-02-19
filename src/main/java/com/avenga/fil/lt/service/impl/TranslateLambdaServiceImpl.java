@@ -5,7 +5,6 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.avenga.fil.lt.data.*;
 import com.avenga.fil.lt.exception.AbsentFileException;
 import com.avenga.fil.lt.service.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,6 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
     private final TextExtractService textExtractService;
     private final TextTranslateService textTranslateService;
     private final DocumentFormationService documentFormationService;
-    private final ObjectMapper objectMapper;
     private static final String DATE_TIME_PATTERN = "yyyyMMddHHmmss";
     private static final String FILE_NAME_DELIMITER = "_";
     private static final String URL_PREFIX = "https://sandbox.api.fil.com/language-translator/v1/status?translatedDocumentName=";
@@ -49,7 +47,7 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
             var fileName = constructFileName(payloadData.getDocumentName() + TRANSLATED, payloadData.getFileType(), payloadData.getUserId());
             var statusEntity = getStatus(fileName);
             saveFileToS3(fileName, byteDocument, payloadData);
-            return responseService.createSuccessResponse(objectMapper.writeValueAsString(statusEntity));
+            return responseService.createSuccessResponse(statusEntity);
         } catch (Exception exception) {
             log.error(exception.getMessage(), exception);
             return responseService.createErrorResponse(exception);
