@@ -11,5 +11,19 @@ public class TextExtractInput {
 
     private String bucketName;
     private String fileKey;
+    private String fromLanguage;
+    private String toLanguage;
+    private String userId;
+    private String documentName;
     private String fileType;
+
+    public TextExtractInput(String documentName, FileStorageData fileStorageData, RequestPayloadData requestData) {
+        this.bucketName = fileStorageData.getBucketName();
+        this.fileKey = fileStorageData.getFileKey();
+        this.fromLanguage = requestData.getFromLanguage();
+        this.toLanguage = requestData.getToLanguage();
+        this.userId = requestData.getUserId();
+        this.documentName = documentName;
+        this.fileType = requestData.getFileType();
+    }
 }

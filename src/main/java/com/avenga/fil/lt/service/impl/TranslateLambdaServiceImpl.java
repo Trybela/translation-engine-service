@@ -25,8 +25,6 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
     private final S3Service s3Service;
     private final ResponseService responseService;
     private final TextExtractService textExtractService;
-    private final TextTranslateService textTranslateService;
-    private final DocumentFormationService documentFormationService;
     private static final String DATE_TIME_PATTERN = "yyyyMMddHHmmss";
     private static final String FILE_NAME_DELIMITER = "_";
     private static final String URL_PREFIX = "https://sandbox.api.fil.com/language-translator/v1/status?translatedDocumentName=";
@@ -41,12 +39,9 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
         try {
             var payloadData = parserService.parseAndPreparePayload(event);
             var storageData = getFileFromS3(payloadData);
-            var extractedContent = extractText(payloadData.getFileType(), storageData);
-            var translatedContent = translateText(payloadData, extractedContent);
-            var byteDocument = documentFormationService.formation(fileType(payloadData.getFileType()), translatedContent);
             var fileName = constructFileName(payloadData.getDocumentName() + TRANSLATED, payloadData.getFileType(), payloadData.getUserId());
+            invokingExtractTextProcess(fileName, payloadData, storageData);
             var statusEntity = getStatus(fileName);
-            saveFileToS3(fileName, byteDocument, payloadData);
             return responseService.createSuccessResponse(statusEntity);
         } catch (Exception exception) {
             log.error(exception.getMessage(), exception);
@@ -63,26 +58,9 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
         return storageData;
     }
 
-    private void saveFileToS3(String fileName, byte[] byteDocument, RequestPayloadData payloadData) {
-        s3Service.saveFile(fileName, byteDocument, fileType(payloadData.getFileType()).getContentType());
-    }
-
-    private String extractText(String fileType, FileStorageData storageData) {
-        var pages = textExtractService.extractText(new TextExtractInput(storageData.getBucketName(),
-                storageData.getFileKey(), fileType));
-        log.info(TEXT_EXTRACT_ENDED);
-        return pages;
-    }
-
-    private FileType fileType(String type) {
-        return FileType.valueOf(type.toUpperCase());
-    }
-
-    private String translateText(RequestPayloadData payloadData, String content) {
-        var pages = textTranslateService.translate(new TextTranslateInput(payloadData.getFromLanguage(),
-                payloadData.getToLanguage(), content, payloadData.getFileType()));
-        log.info(TEXT_TRANSLATE_ENDED);
-        return pages;
+    private void invokingExtractTextProcess(String fileName, RequestPayloadData requestPayloadData, FileStorageData storageData) {
+        textExtractService.extractText(new TextExtractInput(fileName, storageData, requestPayloadData));
+        log.info(TEXT_EXTRACT_LAMBDA_INVOKED);
     }
 
     private String constructFileName(String fileName, String fileType, String userId) {

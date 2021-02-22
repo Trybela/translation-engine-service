@@ -6,10 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.exception.SdkException;
-import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Slf4j
 @Service
@@ -21,17 +19,6 @@ public class S3ServiceImpl implements S3Service {
     public S3ServiceImpl(@Value("${s3.bucketName}") String bucketName, S3Client s3Client) {
         this.bucketName = bucketName;
         this.s3Client = s3Client;
-    }
-
-    @Override
-    public FileStorageData saveFile(String fileName, byte[] binaryFile, String contentType) {
-        PutObjectRequest objectRequest = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(fileName)
-                .contentType(contentType)
-                .build();
-        s3Client.putObject(objectRequest, RequestBody.fromBytes(binaryFile));
-        return new FileStorageData(bucketName, fileName);
     }
 
     @Override
