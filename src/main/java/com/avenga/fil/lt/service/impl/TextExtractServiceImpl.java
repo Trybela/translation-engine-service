@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.lambda.LambdaClient;
+import software.amazon.awssdk.services.lambda.model.InvocationType;
 import software.amazon.awssdk.services.lambda.model.InvokeRequest;
 
 import static com.avenga.fil.lt.constant.GeneralConstants.TEXT_EXTRACT_PROCESS_ERROR_MESSAGE;
@@ -21,21 +22,22 @@ public class TextExtractServiceImpl implements TextExtractService {
     private final LambdaClient lambdaClient;
     private final ObjectMapper objectMapper;
 
-    public TextExtractServiceImpl(@Value("${textExtract.functionName}") String functionName, LambdaClient lambdaClient,
-                                  ObjectMapper objectMapper) {
+    public TextExtractServiceImpl(@Value("${textExtract.functionName}") String functionName,
+                                  LambdaClient lambdaClient, ObjectMapper objectMapper) {
         this.functionName = functionName;
         this.lambdaClient = lambdaClient;
         this.objectMapper = objectMapper;
     }
 
     @Override
-    public String extractText(TextExtractInput inputData) {
+    public void extractText(TextExtractInput inputData) {
         try {
             InvokeRequest request = InvokeRequest.builder()
                     .functionName(functionName)
                     .payload(SdkBytes.fromUtf8String(objectMapper.writeValueAsString(inputData)))
+                    .invocationType(InvocationType.EVENT)
                     .build();
-            return lambdaClient.invoke(request).payload().asUtf8String();
+            lambdaClient.invoke(request);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw new TextExtractProcessException(TEXT_EXTRACT_PROCESS_ERROR_MESSAGE);
