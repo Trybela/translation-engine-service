@@ -35,6 +35,7 @@ public class RequestParserServiceImpl implements RequestParserService {
                 .fromLanguage(queryParams.get(FROM_LANGUAGE))
                 .toLanguage(queryParams.get(TO_LANGUAGE))
                 .userId(queryParams.get(USER_ID))
+                .unit(queryParams.get(BUSINESS_UNIT))
                 .build();
     }
 
