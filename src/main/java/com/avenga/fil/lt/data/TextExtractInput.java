@@ -16,6 +16,7 @@ public class TextExtractInput {
     private String userId;
     private String documentName;
     private String fileType;
+    private String unit;
 
     public TextExtractInput(String documentName, FileStorageData fileStorageData, RequestPayloadData requestData) {
         this.bucketName = fileStorageData.getBucketName();
@@ -25,5 +26,6 @@ public class TextExtractInput {
         this.userId = requestData.getUserId();
         this.documentName = documentName;
         this.fileType = requestData.getFileType();
+        this.unit = requestData.getUnit();
     }
 }

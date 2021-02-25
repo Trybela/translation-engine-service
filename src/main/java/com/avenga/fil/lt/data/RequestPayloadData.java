@@ -14,4 +14,5 @@ public class RequestPayloadData {
     private String userId;
     private String documentName;
     private String fileType;
+    private String unit;
 }
