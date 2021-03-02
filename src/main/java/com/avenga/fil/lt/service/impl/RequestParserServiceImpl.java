@@ -8,8 +8,16 @@ import com.avenga.fil.lt.exception.UnsupportedFileTypeException;
 import com.avenga.fil.lt.service.RequestParserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.avenga.fil.lt.constant.ApiEventConstants.*;
 import static com.avenga.fil.lt.constant.GeneralConstants.*;
@@ -36,6 +44,8 @@ public class RequestParserServiceImpl implements RequestParserService {
                 .toLanguage(queryParams.get(TO_LANGUAGE))
                 .userId(queryParams.get(USER_ID))
                 .unit(queryParams.get(BUSINESS_UNIT))
+                .applyXlsRules(parseAndValidateApplyXlsRules(queryParams.get(APPLY_XLS_RULES)))
+                .xlsColumns(parseAndValidateXlsColumns(queryParams.get(XLS_COLUMNS)))
                 .build();
     }
 
@@ -52,5 +62,49 @@ public class RequestParserServiceImpl implements RequestParserService {
             throw new UnsupportedFileTypeException(String.format(UNSUPPORTED_FILE_TYPE_ERROR_MESSAGE, fileType));
         }
         return fileType;
+    }
+
+    private boolean parseAndValidateApplyXlsRules(String applyXlsRules) {
+        if (StringUtils.hasText(applyXlsRules)) {
+            return Boolean.parseBoolean(applyXlsRules);
+        }
+        return false;
+    }
+
+    private String parseAndValidateXlsColumns(String xlsColumns) {
+        if (!StringUtils.hasText(xlsColumns)) {
+            return null;
+        }
+        xlsColumns = xlsColumns.replaceAll("\\s+", "");
+        if (!validate(xlsColumns)) {
+            throw new UnsupportedFileTypeException(String.format(WRONG_INPUT_FORMAT_ERROR_MESSAGE, xlsColumns));
+        }
+        return convertAndNormalize(xlsColumns);
+    }
+
+    private String convertAndNormalize(String xlsColumns) {
+        return Stream.of(xlsColumns.split(","))
+                .map(String::trim)
+                .map(s -> s.contains("-") ? convertRangeToList(s) : List.of(Integer.parseInt(s)))
+                .flatMap(Collection::stream)
+                .distinct()
+                .sorted()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+    }
+
+    private List<Integer> convertRangeToList(String range) {
+        String[] rangeArray = range.split("-");
+        int startNumber = Integer.parseInt(rangeArray[0]);
+        int endNumber = Integer.parseInt(rangeArray[1]);
+        return IntStream.rangeClosed(startNumber, endNumber).boxed().collect(Collectors.toList());
+    }
+
+    private boolean validate(String xlsColumns) {
+        // allow only numbers, -(dash) and ,(comma) in any order
+        String format = "[0-9]+(?:-[0-9]+)?(,[0-9]+(?:-[0-9]+)?)*";
+        Pattern pattern = Pattern.compile(format);
+        Matcher matcher = pattern.matcher(xlsColumns);
+        return matcher.matches();
     }
 }

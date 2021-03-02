@@ -15,4 +15,6 @@ public class RequestPayloadData {
     private String documentName;
     private String fileType;
     private String unit;
+    private boolean applyXlsRules;
+    private String xlsColumns;
 }
