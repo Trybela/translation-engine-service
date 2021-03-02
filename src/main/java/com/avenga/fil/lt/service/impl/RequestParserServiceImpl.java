@@ -65,10 +65,7 @@ public class RequestParserServiceImpl implements RequestParserService {
     }
 
     private boolean parseAndValidateApplyXlsRules(String applyXlsRules) {
-        if (StringUtils.hasText(applyXlsRules)) {
-            return Boolean.parseBoolean(applyXlsRules);
-        }
-        return false;
+        return Boolean.parseBoolean(applyXlsRules);
     }
 
     private String parseAndValidateXlsColumns(String xlsColumns) {
