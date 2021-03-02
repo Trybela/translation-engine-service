@@ -28,6 +28,6 @@ public class TextExtractInput {
         this.documentName = documentName;
         this.fileType = requestData.getFileType();
         this.unit = requestData.getUnit();
-        this.xlsColumns = requestData.isApplyXlsRules() ? requestData.getXlsColumns() : null;
+        this.xlsColumns = requestData.isApplyXlsRules() ? requestData.getXlsColumns() : "";
     }
 }
