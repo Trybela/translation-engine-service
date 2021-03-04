@@ -3,7 +3,9 @@ package com.avenga.fil.lt.service.impl;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.avenga.fil.lt.config.property.SupportedValues;
 import com.avenga.fil.lt.data.RequestPayloadData;
+import com.avenga.fil.lt.exception.AbsentRequestHeader;
 import com.avenga.fil.lt.exception.AbsentRequestQueryParameter;
+import com.avenga.fil.lt.exception.EmptyRequestHeader;
 import com.avenga.fil.lt.exception.UnsupportedFileTypeException;
 import com.avenga.fil.lt.service.RequestParserService;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import org.springframework.util.StringUtils;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -32,21 +35,29 @@ public class RequestParserServiceImpl implements RequestParserService {
 
     @Override
     public RequestPayloadData parseAndPreparePayload(APIGatewayProxyRequestEvent event) {
+        var userId = parseUserId(event.getHeaders());
         var queryParams = validateRequestQueryParameter(event.getQueryStringParameters());
-        return constructPayloadData(queryParams);
+        return constructPayloadData(userId, queryParams);
     }
 
-    private RequestPayloadData constructPayloadData(Map<String, String> queryParams) {
+    private RequestPayloadData constructPayloadData(String userId, Map<String, String> queryParams) {
         return RequestPayloadData.builder()
                 .fileType(parseAndValidateFileType(queryParams.get(DOCUMENT_NAME)))
                 .documentName(queryParams.get(DOCUMENT_NAME))
                 .fromLanguage(queryParams.get(FROM_LANGUAGE))
                 .toLanguage(queryParams.get(TO_LANGUAGE))
-                .userId(queryParams.get(USER_ID))
+                .userId(userId)
                 .unit(queryParams.get(BUSINESS_UNIT))
                 .applyXlsRules(parseAndValidateApplyXlsRules(queryParams.get(APPLY_XLS_RULES)))
                 .xlsColumns(parseAndValidateXlsColumns(queryParams.get(XLS_COLUMNS)))
                 .build();
+    }
+
+    private String parseUserId(Map<String, String> headers) {
+        if (headers == null || !headers.containsKey(USER_ID)) {
+            throw new AbsentRequestHeader(String.format(ABSENT_REQUEST_HEADER_ERROR_MESSAGE, USER_ID));
+        }
+        return Optional.ofNullable(headers.get(USER_ID)).orElseThrow(() -> new EmptyRequestHeader(String.format(EMPTY_REQUEST_HEADER_ERROR_MESSAGE, USER_ID)));
     }
 
     private Map<String, String> validateRequestQueryParameter(Map<String, String> queryParameters) {
