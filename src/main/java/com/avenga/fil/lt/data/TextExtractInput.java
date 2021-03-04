@@ -17,6 +17,7 @@ public class TextExtractInput {
     private String documentName;
     private String fileType;
     private String unit;
+    private String xlsColumns;
 
     public TextExtractInput(String documentName, FileStorageData fileStorageData, RequestPayloadData requestData) {
         this.bucketName = fileStorageData.getBucketName();
@@ -27,5 +28,6 @@ public class TextExtractInput {
         this.documentName = documentName;
         this.fileType = requestData.getFileType();
         this.unit = requestData.getUnit();
+        this.xlsColumns = requestData.isApplyXlsRules() ? requestData.getXlsColumns() : "";
     }
 }

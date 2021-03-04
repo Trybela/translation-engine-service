@@ -10,7 +10,7 @@ import org.springframework.http.HttpMethod;
 @Builder
 public class Link {
 
-    private final String rel = "self";
+    private final String rel = "translate-status";
     private String href;
     private final HttpMethod method = HttpMethod.GET;
 
