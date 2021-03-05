@@ -57,7 +57,7 @@ public class RequestParserServiceImpl implements RequestParserService {
         if (headers == null || !headers.containsKey(USER_ID)) {
             throw new AbsentRequestHeader(String.format(ABSENT_REQUEST_HEADER_ERROR_MESSAGE, USER_ID));
         }
-        return Optional.ofNullable(headers.get(USER_ID)).orElseThrow(() -> new EmptyRequestHeader(String.format(EMPTY_REQUEST_HEADER_ERROR_MESSAGE, USER_ID)));
+        return Optional.ofNullable(headers.get(USER_ID)).filter(s -> !s.isBlank()).orElseThrow(() -> new EmptyRequestHeader(String.format(EMPTY_REQUEST_HEADER_ERROR_MESSAGE, USER_ID)));
     }
 
     private Map<String, String> validateRequestQueryParameter(Map<String, String> queryParameters) {
