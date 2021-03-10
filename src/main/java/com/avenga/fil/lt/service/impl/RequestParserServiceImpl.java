@@ -3,19 +3,16 @@ package com.avenga.fil.lt.service.impl;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.avenga.fil.lt.config.property.SupportedValues;
 import com.avenga.fil.lt.data.RequestPayloadData;
-import com.avenga.fil.lt.exception.AbsentRequestHeader;
-import com.avenga.fil.lt.exception.AbsentRequestQueryParameter;
-import com.avenga.fil.lt.exception.EmptyRequestHeader;
-import com.avenga.fil.lt.exception.UnsupportedFileTypeException;
+import com.avenga.fil.lt.exception.*;
 import com.avenga.fil.lt.service.RequestParserService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -25,6 +22,7 @@ import java.util.stream.Stream;
 import static com.avenga.fil.lt.constant.ApiEventConstants.*;
 import static com.avenga.fil.lt.constant.GeneralConstants.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RequestParserServiceImpl implements RequestParserService {
@@ -32,24 +30,25 @@ public class RequestParserServiceImpl implements RequestParserService {
     private static final int NEXT_INDEX = 1;
 
     private final SupportedValues supportedValues;
+    private final ObjectMapper objectMapper;
 
     @Override
     public RequestPayloadData parseAndPreparePayload(APIGatewayProxyRequestEvent event) {
         var userId = parseUserId(event.getHeaders());
-        var queryParams = validateRequestQueryParameter(event.getQueryStringParameters());
-        return constructPayloadData(userId, queryParams);
+        var requestBodyParameters = validateRequestBodyParameters(event.getBody());
+        return constructPayloadData(userId, requestBodyParameters);
     }
 
-    private RequestPayloadData constructPayloadData(String userId, Map<String, String> queryParams) {
+    private RequestPayloadData constructPayloadData(String userId, Map<String, String> requestBodyParameters) {
         return RequestPayloadData.builder()
-                .fileType(parseAndValidateFileType(queryParams.get(DOCUMENT_NAME)))
-                .documentName(queryParams.get(DOCUMENT_NAME))
-                .fromLanguage(queryParams.get(FROM_LANGUAGE))
-                .toLanguage(queryParams.get(TO_LANGUAGE))
+                .fileType(parseAndValidateFileType(requestBodyParameters.get(DOCUMENT_NAME)))
+                .documentName(requestBodyParameters.get(DOCUMENT_NAME))
+                .fromLanguage(requestBodyParameters.get(FROM_LANGUAGE))
+                .toLanguage(requestBodyParameters.get(TO_LANGUAGE))
                 .userId(userId)
-                .unit(queryParams.get(BUSINESS_UNIT))
-                .applyXlsRules(parseAndValidateApplyXlsRules(queryParams.get(APPLY_XLS_RULES)))
-                .xlsColumns(parseAndValidateXlsColumns(queryParams.get(XLS_COLUMNS)))
+                .unit(requestBodyParameters.get(BUSINESS_UNIT))
+                .applyXlsRules(parseAndValidateApplyXlsRules(requestBodyParameters.get(APPLY_XLS_RULES)))
+                .xlsColumns(parseAndValidateXlsColumns(requestBodyParameters.get(XLS_COLUMNS)))
                 .build();
     }
 
@@ -57,14 +56,26 @@ public class RequestParserServiceImpl implements RequestParserService {
         if (headers == null || !headers.containsKey(USER_ID)) {
             throw new AbsentRequestHeader(String.format(ABSENT_REQUEST_HEADER_ERROR_MESSAGE, USER_ID));
         }
-        return Optional.ofNullable(headers.get(USER_ID)).filter(s -> !s.isBlank()).orElseThrow(() -> new EmptyRequestHeader(String.format(EMPTY_REQUEST_HEADER_ERROR_MESSAGE, USER_ID)));
+        return Optional.ofNullable(headers.get(USER_ID)).filter(s -> !s.isBlank())
+                .orElseThrow(() -> new EmptyRequestHeader(String.format(EMPTY_REQUEST_HEADER_ERROR_MESSAGE, USER_ID)));
     }
 
-    private Map<String, String> validateRequestQueryParameter(Map<String, String> queryParameters) {
-        if (queryParameters == null || !queryParameters.keySet().containsAll(supportedValues.getQueryParameters())) {
-            throw new AbsentRequestQueryParameter(ABSENT_REQUEST_QUERY_PARAM_ERROR_MESSAGE);
+    private Map<String, String> validateRequestBodyParameters(String body) {
+        try {
+            if (!StringUtils.hasText(body)) {
+                throw new EmptyRequestBodyException(EMPTY_REQUEST_BODY);
+            }
+            return validateMandatoryRequestBodyParameters(objectMapper.readValue(body, new TypeReference<>() {}));
+        } catch (Exception e) {
+            throw new RequestBodyParsingException(String.format(REQUEST_BODY_PARSING_ERROR_MESSAGE, e.getMessage()));
         }
-        return queryParameters;
+    }
+
+    private Map<String, String> validateMandatoryRequestBodyParameters(Map<String, String> parameters) {
+        if (!parameters.keySet().containsAll(supportedValues.getRequestBodyParameters())) {
+            throw new AbsentRequestBodyParameter(ABSENT_REQUEST_BODY_PARAM_ERROR_MESSAGE);
+        }
+        return parameters;
     }
 
     private String parseAndValidateFileType(String fileName) {
