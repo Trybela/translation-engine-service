@@ -13,5 +13,5 @@ public class SupportedValues {
 
     private Set<String> extensions;
 
-    private Set<String> queryParameters;
+    private Set<String> requestBodyParameters;
 }

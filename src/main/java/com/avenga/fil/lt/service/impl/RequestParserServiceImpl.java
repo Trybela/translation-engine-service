@@ -62,18 +62,17 @@ public class RequestParserServiceImpl implements RequestParserService {
 
     private Map<String, String> validateRequestBodyParameters(String body) {
         try {
-            if (Objects.isNull(body) || body.isBlank()) {
+            if (!StringUtils.hasText(body)) {
                 throw new EmptyRequestBodyException(EMPTY_REQUEST_BODY);
             }
             return validateMandatoryRequestBodyParameters(objectMapper.readValue(body, new TypeReference<>() {}));
         } catch (Exception e) {
-            log.info(e.getMessage());
             throw new RequestBodyParsingException(String.format(REQUEST_BODY_PARSING_ERROR_MESSAGE, e.getMessage()));
         }
     }
 
     private Map<String, String> validateMandatoryRequestBodyParameters(Map<String, String> parameters) {
-        if (!parameters.keySet().containsAll(supportedValues.getQueryParameters())) {
+        if (!parameters.keySet().containsAll(supportedValues.getRequestBodyParameters())) {
             throw new AbsentRequestBodyParameter(ABSENT_REQUEST_BODY_PARAM_ERROR_MESSAGE);
         }
         return parameters;
