@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.services.lambda.LambdaClient;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 
 @Configuration
 @EnableConfigurationProperties({SupportedValues.class, TranslationOption.class})
@@ -22,6 +23,12 @@ public class BeanConfiguration {
     @Bean
     public LambdaClient lambdaClient() {
         return LambdaClient.builder().build();
+    }
+
+
+    @Bean
+    public SecretsManagerClient secretsManagerClient() {
+        return SecretsManagerClient.builder().build();
     }
 
     @Bean
