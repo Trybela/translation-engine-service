@@ -13,7 +13,7 @@ import javax.sql.DataSource;
 
 @Configuration
 @Profile(Profiles.DB)
-public class DataSourceConfig {
+public class DataSourceConfiguration {
 
     @Bean
     public DataSource getDataSource(final SecretManagerService secretManagerService, final DBProperties dbProperties) {
