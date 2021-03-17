@@ -43,8 +43,8 @@ public class RequestParserServiceImpl implements RequestParserService {
         return RequestPayloadData.builder()
                 .fileType(parseAndValidateFileType(requestBodyParameters.get(DOCUMENT_NAME)))
                 .documentName(requestBodyParameters.get(DOCUMENT_NAME))
-                .fromLanguage(requestBodyParameters.get(FROM_LANGUAGE))
-                .toLanguage(requestBodyParameters.get(TO_LANGUAGE))
+                .fromLanguage(validateLanguageCode(requestBodyParameters.get(FROM_LANGUAGE)))
+                .toLanguage(validateLanguageCode(requestBodyParameters.get(TO_LANGUAGE)))
                 .userId(userId)
                 .unit(requestBodyParameters.get(BUSINESS_UNIT))
                 .applyXlsRules(parseAndValidateApplyXlsRules(requestBodyParameters.get(APPLY_XLS_RULES)))
@@ -84,6 +84,13 @@ public class RequestParserServiceImpl implements RequestParserService {
             throw new UnsupportedFileTypeException(String.format(UNSUPPORTED_FILE_TYPE_ERROR_MESSAGE, fileType));
         }
         return fileType;
+    }
+
+    private String validateLanguageCode(String languageCode) {
+        if (!(supportedValues.getLanguageCodes().contains(languageCode))) {
+            throw new UnsupportedLanguageCodeException(String.format(UNSUPPORTED_LANGUAGE_CODE_ERROR_MESSAGE, languageCode));
+        }
+        return languageCode;
     }
 
     private boolean parseAndValidateApplyXlsRules(String applyXlsRules) {
