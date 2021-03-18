@@ -128,7 +128,7 @@ public class RequestParserServiceImpl implements RequestParserService {
 
     private boolean validate(String xlsColumns) {
         // allow only capital letters, -(dash) and ,(comma) in any order
-        String format = "[A-Z]+(?:-[A-Z]+)?(,[A-Z]+(?:-[A-Z]+)?)*";
+        String format = "(([A-Z]){1,3}(-([A-Z]){1,3})?)(,([A-Z]){1,3}(-([A-Z]){1,3})?)*";
         Pattern pattern = Pattern.compile(format);
         Matcher matcher = pattern.matcher(xlsColumns);
         return matcher.matches();
