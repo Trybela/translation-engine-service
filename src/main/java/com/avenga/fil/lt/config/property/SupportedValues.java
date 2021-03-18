@@ -12,6 +12,6 @@ import java.util.Set;
 public class SupportedValues {
 
     private Set<String> extensions;
-
     private Set<String> requestBodyParameters;
+    private Set<String> languageCodes;
 }

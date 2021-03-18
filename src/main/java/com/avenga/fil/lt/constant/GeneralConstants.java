@@ -9,6 +9,7 @@ public final class GeneralConstants {
 
     //ERROR MESSAGE
     public static final String UNSUPPORTED_FILE_TYPE_ERROR_MESSAGE = "Given %s file type is not supported";
+    public static final String UNSUPPORTED_LANGUAGE_CODE_ERROR_MESSAGE = "Given %s language code is not supported";
     public static final String ABSENT_REQUEST_HEADER_ERROR_MESSAGE = "Request header %s is absent";
     public static final String EMPTY_REQUEST_HEADER_ERROR_MESSAGE = "Request header %s is empty";
     public static final String ABSENT_REQUEST_BODY_PARAM_ERROR_MESSAGE = "Not all mandatory request body parameters exist";
