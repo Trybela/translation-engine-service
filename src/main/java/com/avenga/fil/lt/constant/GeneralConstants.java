@@ -16,6 +16,7 @@ public final class GeneralConstants {
     public static final String ABSENT_FILE_ON_S3_BUCKET_ERROR_MESSAGE = "File %s is absent on S3 bucket!";
     public static final String TEXT_EXTRACT_PROCESS_ERROR_MESSAGE = "Error during invoke extracting text process";
     public static final String WRONG_INPUT_FORMAT_ERROR_MESSAGE = "xlsColumns %s has wrong format. Supported input format: A,B,D or D-AA or mix of these two formats";
+    public static final String OUT_OF_RANGE_INPUT_VALUE_ERROR_MESSAGE = "xlsColumns contains column %S that is out of range. Allowed values are in the range A-XSD";
     public static final String REQUEST_BODY_PARSING_ERROR_MESSAGE = "Error during parsing request body - %s.";
     public static final String EMPTY_REQUEST_BODY = "Request body is empty!";
 

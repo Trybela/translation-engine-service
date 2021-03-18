@@ -103,7 +103,7 @@ public class RequestParserServiceImpl implements RequestParserService {
         }
         xlsColumns = xlsColumns.replaceAll("\\s+", "").toUpperCase();
         if (!validate(xlsColumns)) {
-            throw new UnsupportedFileTypeException(String.format(WRONG_INPUT_FORMAT_ERROR_MESSAGE, xlsColumns));
+            throw new WrongInputFormatException(String.format(WRONG_INPUT_FORMAT_ERROR_MESSAGE, xlsColumns));
         }
         return convertAndNormalize(xlsColumns);
     }
@@ -135,6 +135,9 @@ public class RequestParserServiceImpl implements RequestParserService {
     }
 
     private int getExcelColumnNumber(String column) {
+        if (column.length() >= 3 && column.compareTo("XFD") > 0) {
+            throw new WrongInputFormatException(String.format(OUT_OF_RANGE_INPUT_VALUE_ERROR_MESSAGE, column));
+        }
         int result = 0;
         for (int i = 0; i < column.length(); i++) {
             result *= 26;
