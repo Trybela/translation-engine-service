@@ -101,9 +101,9 @@ public class RequestParserServiceImpl implements RequestParserService {
         if (!StringUtils.hasText(xlsColumns)) {
             return null;
         }
-        xlsColumns = xlsColumns.replaceAll("\\s+", "");
+        xlsColumns = xlsColumns.replaceAll("\\s+", "").toUpperCase();
         if (!validate(xlsColumns)) {
-            throw new UnsupportedFileTypeException(String.format(WRONG_INPUT_FORMAT_ERROR_MESSAGE, xlsColumns));
+            throw new WrongInputFormatException(String.format(WRONG_INPUT_FORMAT_ERROR_MESSAGE, xlsColumns));
         }
         return convertAndNormalize(xlsColumns);
     }
@@ -111,7 +111,7 @@ public class RequestParserServiceImpl implements RequestParserService {
     private String convertAndNormalize(String xlsColumns) {
         return Stream.of(xlsColumns.split(","))
                 .map(String::trim)
-                .map(s -> s.contains("-") ? convertRangeToList(s) : List.of(Integer.parseInt(s)))
+                .map(s -> s.contains("-") ? convertRangeToList(s) : List.of(getExcelColumnNumber(s)))
                 .flatMap(Collection::stream)
                 .distinct()
                 .sorted()
@@ -121,16 +121,28 @@ public class RequestParserServiceImpl implements RequestParserService {
 
     private List<Integer> convertRangeToList(String range) {
         String[] rangeArray = range.split("-");
-        int startNumber = Integer.parseInt(rangeArray[0]);
-        int endNumber = Integer.parseInt(rangeArray[1]);
+        int startNumber = getExcelColumnNumber(rangeArray[0]);
+        int endNumber = getExcelColumnNumber(rangeArray[1]);
         return IntStream.rangeClosed(startNumber, endNumber).boxed().collect(Collectors.toList());
     }
 
     private boolean validate(String xlsColumns) {
-        // allow only numbers, -(dash) and ,(comma) in any order
-        String format = "[0-9]+(?:-[0-9]+)?(,[0-9]+(?:-[0-9]+)?)*";
+        // allow only capital letters, -(dash) and ,(comma) in any order
+        String format = "(([A-Z]){1,3}(-([A-Z]){1,3})?)(,([A-Z]){1,3}(-([A-Z]){1,3})?)*";
         Pattern pattern = Pattern.compile(format);
         Matcher matcher = pattern.matcher(xlsColumns);
         return matcher.matches();
+    }
+
+    private int getExcelColumnNumber(String column) {
+        if (column.length() >= 3 && column.compareTo("XFD") > 0) {
+            throw new WrongInputFormatException(String.format(OUT_OF_RANGE_INPUT_VALUE_ERROR_MESSAGE, column));
+        }
+        int result = 0;
+        for (int i = 0; i < column.length(); i++) {
+            result *= 26;
+            result += column.charAt(i) - 'A' + 1;
+        }
+        return result;
     }
 }
