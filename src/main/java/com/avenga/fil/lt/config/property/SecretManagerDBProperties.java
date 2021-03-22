@@ -11,5 +11,5 @@ public class SecretManagerDBProperties {
 
     private String host;
     private int port;
-    private String dbname;
+    private String engine;
 }
