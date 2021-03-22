@@ -27,6 +27,6 @@ public class DataSourceConfiguration {
 
     public String constructUrl(SecretManagerDBProperties secretManagerDBProperties) {
         return "jdbc-secretsmanager:postgresql://" + secretManagerDBProperties.getHost() + ":"
-                + secretManagerDBProperties.getPort() + "/" + secretManagerDBProperties.getDbname();
+                + secretManagerDBProperties.getPort() + "/" + secretManagerDBProperties.getEngine();
     }
 }
