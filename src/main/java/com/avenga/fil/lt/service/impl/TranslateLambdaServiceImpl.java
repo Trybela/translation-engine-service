@@ -65,7 +65,8 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
 
     private String constructFileName(String fileName, String fileType, String userId) {
         var dateTime = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN).format(LocalDateTime.now());
-        return new StringJoiner(FILE_NAME_DELIMITER).add(fileName).add(userId).add(dateTime).toString() +
+        var pureFileName = fileName.substring(0, fileName.lastIndexOf(EXTENSION_DELIMITER));
+        return new StringJoiner(FILE_NAME_DELIMITER).add(pureFileName).add(userId).add(dateTime).toString() +
                 EXTENSION_DELIMITER + fileType;
     }
 
