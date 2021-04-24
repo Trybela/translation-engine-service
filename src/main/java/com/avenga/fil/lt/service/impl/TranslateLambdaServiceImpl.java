@@ -27,7 +27,7 @@ public class TranslateLambdaServiceImpl implements TranslateLambdaService {
     private final TextExtractService textExtractService;
     private static final String DATE_TIME_PATTERN = "yyyyMMddHHmmss";
     private static final String FILE_NAME_DELIMITER = "_";
-    private static final String URL_PREFIX = "https://sandbox.api.fil.com/language-translator/v1/status?translatedDocumentName=";
+    private static final String URL_PREFIX = "https://stage.api.fil.com/language-translator/v1/translate-status?translatedDocumentName=";
 
     @Override
     public APIGatewayProxyResponseEvent processRequest(APIGatewayProxyRequestEvent event) {
