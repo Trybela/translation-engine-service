@@ -46,7 +46,7 @@ public class RequestParserServiceImpl implements RequestParserService {
                 .fromLanguage(validateLanguageCode(requestBodyParameters.get(FROM_LANGUAGE)))
                 .toLanguage(validateLanguageCode(requestBodyParameters.get(TO_LANGUAGE)))
                 .userId(userId)
-                .unit(requestBodyParameters.get(BUSINESS_UNIT))
+                .businessUnit(userId)
                 .applyXlsRules(parseAndValidateApplyXlsRules(requestBodyParameters.get(APPLY_XLS_RULES)))
                 .xlsColumns(parseAndValidateXlsColumns(requestBodyParameters.get(XLS_COLUMNS)))
                 .build();

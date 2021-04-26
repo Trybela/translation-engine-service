@@ -27,7 +27,7 @@ public class TextExtractInput {
         this.userId = requestData.getUserId();
         this.documentName = documentName;
         this.fileType = requestData.getFileType();
-        this.unit = requestData.getUnit();
+        this.unit = requestData.getBusinessUnit();
         this.xlsColumns = requestData.isApplyXlsRules() ? requestData.getXlsColumns() : "";
     }
 }
