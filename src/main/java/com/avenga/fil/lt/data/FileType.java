@@ -14,7 +14,8 @@ public enum FileType {
     BMP("image/bmp"),
     XLS("application/vnd.ms-excel"),
     XLSX("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
-    TXT("text/plain");
+    TXT("text/plain"),
+    DOCX("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
 
     private final String contentType;
 
